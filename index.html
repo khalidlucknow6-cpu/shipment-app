@@ -2,112 +2,213 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Shipment Booking Form</title>
+<title>Shipment Details Application</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<!-- Bootstrap -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+<!-- jsPDF -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
+<!-- XLSX -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
 <style>
-body{
-    font-family: Arial;
-    background:#f4f6f9;
-    padding:20px;
+body {
+    background: linear-gradient(to right, #0f2027, #203a43, #2c5364);
+    font-family: Arial, sans-serif;
 }
-.container{
-    max-width:750px;
-    margin:auto;
-    background:white;
-    padding:25px;
-    border-radius:8px;
-    box-shadow:0 0 10px rgba(0,0,0,0.1);
+.container-box {
+    background: white;
+    padding: 25px;
+    border-radius: 15px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.3);
 }
-h2{
-    text-align:center;
-    margin-bottom:20px;
+h2 {
+    text-align: center;
+    font-weight: bold;
 }
-label{
-    font-weight:bold;
-}
-input, select{
-    width:100%;
-    padding:10px;
-    margin-top:5px;
-    margin-bottom:15px;
-    border:1px solid #ccc;
-    border-radius:5px;
-}
-button{
-    padding:10px 15px;
-    margin-right:10px;
-    border:none;
-    border-radius:5px;
-    cursor:pointer;
-}
-.pdf-btn{
-    background:#007bff;
-    color:white;
-}
-.excel-btn{
-    background:#28a745;
-    color:white;
+.table th {
+    background-color: #2c5364;
+    color: white;
 }
 </style>
 </head>
-
 <body>
 
-<div class="container">
-<h2>Shipment Booking Form</h2>
+<div class="container mt-4 mb-5">
+<div class="container-box">
 
+<h2>Shipment Details Application</h2>
+<hr>
+
+<form id="shipmentForm">
+
+<div class="row g-3">
+
+<div class="col-md-4">
 <label>Shipment Type</label>
-<select id="shipmentType">
-<option>Exwork</option>
+<select class="form-control" id="type">
+<option>EXWORK</option>
 <option>FOB</option>
-<option>CIF</option>
+<option>LCL</option>
 </select>
+</div>
 
-<label>Number of Containers</label>
-<input type="text" id="containers">
+<div class="col-md-4">
+<label>No. of Containers</label>
+<input type="number" class="form-control" id="container">
+</div>
 
+<div class="col-md-4">
 <label>Gross Weight</label>
-<input type="text" id="grossWeight">
+<input type="text" class="form-control" id="weight">
+</div>
 
-<label>Dimensions</label>
-<input type="text" id="dimensions">
+<div class="col-md-4">
+<label>Dimension</label>
+<input type="text" class="form-control" id="dimension">
+</div>
 
+<div class="col-md-4">
 <label>Commodity</label>
-<input type="text" id="commodity">
+<input type="text" class="form-control" id="commodity">
+</div>
 
+<div class="col-md-4">
+<label>Gross Value</label>
+<input type="text" class="form-control" id="value">
+</div>
+
+<div class="col-md-4">
 <label>Shipper Zip Code</label>
-<input type="text" id="zipCode">
+<input type="text" class="form-control" id="zip">
+</div>
 
-<label>Delivery Address Location</label>
-<input type="text" id="deliveryLocation">
+<div class="col-md-4">
+<label>Delivery Location</label>
+<input type="text" class="form-control" id="delivery">
+</div>
 
-<label>Sabir</label>
-<input type="text" id="sabir">
+<div class="col-md-4">
+<label>Sabir Required?</label>
+<select class="form-control" id="sabir">
+<option>Yes</option>
+<option>No</option>
+</select>
+</div>
 
-<label>Saber HS Code</label>
-<input type="text" id="sabirHS">
+<div class="col-md-4">
+<label>Sabir HS Code</label>
+<input type="text" class="form-control" id="hscode">
+</div>
+
+</div>
 
 <br>
 
-<button class="pdf-btn" onclick="generatePDF()">Export PDF</button>
-<button class="excel-btn" onclick="exportExcel()">Export Excel</button>
+<button type="button" class="btn btn-success" onclick="saveData()">Save</button>
+<button type="button" class="btn btn-primary" onclick="downloadPDF()">Download PDF</button>
+<button type="button" class="btn btn-warning" onclick="exportExcel()">Export Excel</button>
 
+</form>
+
+<hr>
+
+<h5>Saved Shipments</h5>
+
+<table class="table table-bordered mt-3" id="dataTable">
+<thead>
+<tr>
+<th>Type</th>
+<th>Containers</th>
+<th>Weight</th>
+<th>Commodity</th>
+<th>Delivery</th>
+</tr>
+</thead>
+<tbody></tbody>
+</table>
+
+</div>
 </div>
 
 <script>
 
-function generatePDF(){
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF();
+let shipments = JSON.parse(localStorage.getItem("shipments")) || [];
+displayData();
 
-    doc.setFontSize(16);
-    doc.text("Shipment Booking Details", 20, 20);
+function saveData(){
+let shipment = {
+type: type.value,
+container: container.value,
+weight: weight.value,
+dimension: dimension.value,
+commodity: commodity.value,
+value: value.value,
+zip: zip.value,
+delivery: delivery.value,
+sabir: sabir.value,
+hscode: hscode.value
+};
 
-    doc.setFontSize(12);
-    doc.text("Shipment Type: " + shipmentType.value, 20, 40);
-    doc.text("Containers: " + containers.value, 20, 50);
-    doc.text("Gross Weight: " + grossWeight.value, 20, 60);
-    doc.text("Dimensions: " + 
+shipments.push(shipment);
+localStorage.setItem("shipments", JSON.stringify(shipments));
+displayData();
+shipmentForm.reset();
+}
+
+function displayData(){
+let table = document.querySelector("#dataTable tbody");
+table.innerHTML = "";
+shipments.forEach(s=>{
+table.innerHTML += `
+<tr>
+<td>${s.type}</td>
+<td>${s.container}</td>
+<td>${s.weight}</td>
+<td>${s.commodity}</td>
+<td>${s.delivery}</td>
+</tr>`;
+});
+}
+
+function downloadPDF(){
+const { jsPDF } = window.jspdf;
+let doc = new jsPDF();
+
+doc.setFontSize(18);
+doc.text("Shipment Details", 20, 20);
+
+let y = 30;
+shipments.forEach((s,i)=>{
+doc.setFontSize(12);
+doc.text(`Shipment ${i+1}`,20,y);
+y+=7;
+doc.text(`Type: ${s.type}`,20,y); y+=7;
+doc.text(`Containers: ${s.container}`,20,y); y+=7;
+doc.text(`Weight: ${s.weight}`,20,y); y+=7;
+doc.text(`Dimension: ${s.dimension}`,20,y); y+=7;
+doc.text(`Commodity: ${s.commodity}`,20,y); y+=7;
+doc.text(`Gross Value: ${s.value}`,20,y); y+=7;
+doc.text(`Zip: ${s.zip}`,20,y); y+=7;
+doc.text(`Delivery: ${s.delivery}`,20,y); y+=7;
+doc.text(`Sabir: ${s.sabir}`,20,y); y+=7;
+doc.text(`HS Code: ${s.hscode}`,20,y); y+=10;
+});
+
+doc.save("Shipment_Details.pdf");
+}
+
+function exportExcel(){
+let ws = XLSX.utils.json_to_sheet(shipments);
+let wb = XLSX.utils.book_new();
+XLSX.utils.book_append_sheet(wb, ws, "Shipments");
+XLSX.writeFile(wb, "Shipment_Details.xlsx");
+}
+
+</script>
+
+</body>
+</html>
