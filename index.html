@@ -200,9 +200,35 @@ doc.text(`HS Code: ${s.hscode}`,20,y); y+=10;
 
 doc.save("Shipment_Details.pdf");
 }
-
 function exportExcel(){
-let ws = XLSX.utils.json_to_sheet(shipments);
+
+if(shipments.length === 0){
+alert("No shipment data to export!");
+return;
+}
+
+let worksheet = XLSX.utils.json_to_sheet(shipments);
+let workbook = XLSX.utils.book_new();
+XLSX.utils.book_append_sheet(workbook, worksheet, "Shipments");
+
+let today = new Date().toISOString().slice(0,10);
+let fileName = "Shipment_Report_" + today + ".xlsx";
+
+XLSX.writeFile(workbook, fileName);
+
+}
+}
+
+let worksheet = XLSX.utils.json_to_sheet(shipments);
+let workbook = XLSX.utils.book_new();
+XLSX.utils.book_append_sheet(workbook, worksheet, "Shipments");
+
+let today = new Date().toISOString().slice(0,10);
+let fileName = "Shipment_Report_" + today + ".xlsx";
+
+XLSX.writeFile(workbook, fileName);
+
+}s = XLSX.utils.json_to_sheet(shipments);
 let wb = XLSX.utils.book_new();
 XLSX.utils.book_append_sheet(wb, ws, "Shipments");
 XLSX.writeFile(wb, "Shipment_Details.xlsx");
