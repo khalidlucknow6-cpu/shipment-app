@@ -2,55 +2,54 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Shipment Form</title>
+<title>Shipment Booking Form</title>
 
-<!-- PDF Library -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
-<!-- Excel Library -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-
 <style>
-body {
+body{
     font-family: Arial;
-    background: #f4f6f9;
-    padding: 20px;
+    background:#f4f6f9;
+    padding:20px;
 }
-.container {
-    max-width: 800px;
-    margin: auto;
-    background: white;
-    padding: 25px;
-    border-radius: 10px;
-    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+.container{
+    max-width:750px;
+    margin:auto;
+    background:white;
+    padding:25px;
+    border-radius:8px;
+    box-shadow:0 0 10px rgba(0,0,0,0.1);
 }
-h2 {
-    text-align: center;
-    color: #1a73e8;
+h2{
+    text-align:center;
+    margin-bottom:20px;
 }
-.form-group {
-    margin-bottom: 15px;
+label{
+    font-weight:bold;
 }
-label {
-    font-weight: bold;
+input, select{
+    width:100%;
+    padding:10px;
+    margin-top:5px;
+    margin-bottom:15px;
+    border:1px solid #ccc;
+    border-radius:5px;
 }
-input, select {
-    width: 100%;
-    padding: 8px;
-    margin-top: 5px;
+button{
+    padding:10px 15px;
+    margin-right:10px;
+    border:none;
+    border-radius:5px;
+    cursor:pointer;
 }
-button {
-    background: #1a73e8;
-    color: white;
-    padding: 10px;
-    border: none;
-    cursor: pointer;
-    width: 100%;
-    font-size: 16px;
-    margin-top:10px;
+.pdf-btn{
+    background:#007bff;
+    color:white;
 }
-button:hover {
-    background: #1558b0;
+.excel-btn{
+    background:#28a745;
+    color:white;
 }
 </style>
 </head>
@@ -58,103 +57,57 @@ button:hover {
 <body>
 
 <div class="container">
-<h2>Shipment Form</h2>
+<h2>Shipment Booking Form</h2>
 
-<div class="form-group">
-<label>Company Name</label>
-<input type="text" id="company">
-</div>
-
-<div class="form-group">
-<label>Address</label>
-<input type="text" id="address">
-</div>
-
-<div class="form-group">
-<label>Phone</label>
-<input type="text" id="phone">
-</div>
-
-<div class="form-group">
-<label>Customer Name</label>
-<input type="text" id="customer">
-</div>
-
-<div class="form-group">
-<label>Invoice Number</label>
-<input type="text" id="invoice">
-</div>
-
-<div class="form-group">
-<label>HS Code</label>
-<input type="text" id="hs">
-</div>
-
-<div class="form-group">
-<label>SABER Need</label>
-<select id="saberNeed">
-<option value="">Select</option>
-<option value="Yes">Yes</option>
-<option value="No">No</option>
+<label>Shipment Type</label>
+<select id="shipmentType">
+<option>Exwork</option>
+<option>FOB</option>
+<option>CIF</option>
 </select>
-</div>
 
-<div class="form-group">
-<label>SABER HS Code</label>
-<input type="text" id="saberHs">
-</div>
+<label>Number of Containers</label>
+<input type="text" id="containers">
 
-<button onclick="generatePDF()">Download PDF</button>
-<button onclick="exportExcel()">Export to Excel</button>
+<label>Gross Weight</label>
+<input type="text" id="grossWeight">
+
+<label>Dimensions</label>
+<input type="text" id="dimensions">
+
+<label>Commodity</label>
+<input type="text" id="commodity">
+
+<label>Shipper Zip Code</label>
+<input type="text" id="zipCode">
+
+<label>Delivery Address Location</label>
+<input type="text" id="deliveryLocation">
+
+<label>Sabir</label>
+<input type="text" id="sabir">
+
+<label>Sabir HS Code</label>
+<input type="text" id="sabirHS">
+
+<br>
+
+<button class="pdf-btn" onclick="generatePDF()">Export PDF</button>
+<button class="excel-btn" onclick="exportExcel()">Export Excel</button>
 
 </div>
 
 <script>
 
-function getFormData() {
-    return {
-        Company: document.getElementById("company").value,
-        Address: document.getElementById("address").value,
-        Phone: document.getElementById("phone").value,
-        Customer: document.getElementById("customer").value,
-        Invoice: document.getElementById("invoice").value,
-        HS_Code: document.getElementById("hs").value,
-        SABER_Need: document.getElementById("saberNeed").value,
-        SABER_HS_Code: document.getElementById("saberHs").value
-    };
-}
-
-function generatePDF() {
+function generatePDF(){
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
-    const data = getFormData();
 
     doc.setFontSize(16);
-    doc.text(data.Company, 20, 20);
-
-    doc.setFontSize(10);
-    doc.text("Address: " + data.Address, 20, 30);
-    doc.text("Phone: " + data.Phone, 20, 35);
+    doc.text("Shipment Booking Details", 20, 20);
 
     doc.setFontSize(12);
-    doc.text("Customer: " + data.Customer, 20, 50);
-    doc.text("Invoice No: " + data.Invoice, 20, 60);
-    doc.text("HS Code: " + data.HS_Code, 20, 70);
-    doc.text("SABER Need: " + data.SABER_Need, 20, 80);
-    doc.text("SABER HS Code: " + data.SABER_HS_Code, 20, 90);
-
-    doc.save("Shipment_Details.pdf");
-}
-
-function exportExcel() {
-    const data = [getFormData()];
-    const worksheet = XLSX.utils.json_to_sheet(data);
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Shipment");
-    XLSX.writeFile(workbook, "Shipment_Details.xlsx");
-}
-
-</script>
-
-</body>
-</html>
+    doc.text("Shipment Type: " + shipmentType.value, 20, 40);
+    doc.text("Containers: " + containers.value, 20, 50);
+    doc.text("Gross Weight: " + grossWeight.value, 20, 60);
+    doc.text("Dimensions: " + dimensions.value,
